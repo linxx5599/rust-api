@@ -18,7 +18,7 @@ cargo run
 ## build
 
 ```bash
-cargo build
+cargo build --release
 ```
 
 ## check

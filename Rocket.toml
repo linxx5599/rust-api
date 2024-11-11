@@ -1,0 +1,9 @@
+# Rocket默认配置
+[default]
+address = "127.0.0.1"  # 服务器监听的IP地址
+port = 8000  # 服务器监听的端口号
+
+# 生产环境配置
+[production]
+address = "0.0.0.0"  # 生产环境中监听所有网络接口
+port = 80  # 使用80端口以处理HTTP请求

@@ -25,6 +25,10 @@ impl Fairing for JsonResponseFairing {
                 if let Some(data) = body.into() {
                     data.read_to_end(&mut body_bytes).await.unwrap();
                     let body_str = String::from_utf8(body_bytes).unwrap();
+                    if body_str.contains("404: Not Found") {
+                        //404 Not Found
+                        return;
+                    }
                     let body_json: serde_json::Value = serde_json::from_str(&body_str).unwrap();
                     let json_body = json!({ "data": body_json, "status": Status::Ok.code, "message": "操作成功" });
                     let cursor = Cursor::new(json_body.to_string());

@@ -1,17 +1,17 @@
+use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
+
 #[macro_use]
 extern crate rocket; // 引入Rocket宏
 
 #[path = "./node/node_controller.rs"]
 mod node_controller;
 
-use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
-
 #[path = "./mod.rs"]
 mod json_response_fairing;
- 
+
 // 启动Rocket服务器并挂载路由
 #[launch]
-fn rocket() -> rocket::Rocket<rocket::Build> {
+async fn rocket() -> rocket::Rocket<rocket::Build> {
     // 设置CORS配置 attach(cors)
     let allowed_origins = AllowedOrigins::all();
     let cors = CorsOptions {

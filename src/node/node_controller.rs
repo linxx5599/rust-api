@@ -5,8 +5,8 @@ use serde_json::{json, Value};
 mod node_service;
 
 #[get("/node")]
-fn get_node() -> Value {
-    let result = node_service::get_node();
+async fn get_node() -> Value {
+    let result= node_service::get_node().await;
     json!(result)
 }
 

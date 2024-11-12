@@ -20,7 +20,7 @@ pub async fn get_node() -> Value {
             // 处理错误
             eprintln!("错误: {:?}", err);
             // 您可以返回一个默认值或以不同的方式处理错误
-            return json!({ "data": null, "status": 500, "message": "内部服务器错误" });
+            return json!("500: Internal Server Error");
         }
     }
 }

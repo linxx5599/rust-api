@@ -93,15 +93,14 @@ impl Fairing for JsonResponseFairing {
                             }
                         }
                         let status_code = _response["status"].as_u64().unwrap() as u16;
-                        if status_code != Status::Ok.code {
-                            response.set_status(Status::from_code(status_code).unwrap());
-                            let cursor = Cursor::new(_response.to_string());
-                            response.set_sized_body(cursor.get_ref().len(), cursor);
-                            return;
+                        response.set_status(Status::from_code(status_code).unwrap());
+                        // 判断code小于300，则给_response添加data字段
+                        if status_code < 300 {
+                            let body_json: serde_json::Value =
+                                serde_json::from_str(&body_str).unwrap();
+                            _response["data"] = body_json;
                         }
-                        let body_json: serde_json::Value = serde_json::from_str(&body_str).unwrap();
                         //给_response添加data字段
-                        _response["data"] = body_json;
                         let cursor = Cursor::new(_response.to_string());
                         response.set_sized_body(cursor.get_ref().len(), cursor);
                     }
@@ -117,4 +116,13 @@ impl Fairing for JsonResponseFairing {
             }
         }
     }
+}
+
+
+pub fn get_root_error(err: &dyn std::error::Error) -> &dyn std::error::Error {
+    let mut current_err = err;
+    while let Some(source) = current_err.source() {
+        current_err = source;
+    }
+    current_err
 }

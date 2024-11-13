@@ -1,15 +1,15 @@
 #[macro_use]
 extern crate rocket; // 引入Rocket宏
 
-#[path = "./node/node_controller.rs"]
-mod node_controller;
-#[path = "./pod/pod_controller.rs"]
-mod pod_controller;
+#[path = "./controllers.rs"]
+mod controllers;
 
 use rocket_cors::{AllowedHeaders, AllowedOrigins, CorsOptions};
 
 #[path = "./mod.rs"]
-mod json_response_fairing;
+mod common_mod;
+#[path = "./client.rs"]
+mod kube_client;
  
 // 启动Rocket服务器并挂载路由
 #[launch]
@@ -25,8 +25,9 @@ fn rocket() -> rocket::Rocket<rocket::Build> {
     .expect("Failed to create CORS");
     rocket::build()
         .attach(cors)
-        .attach(json_response_fairing::JsonResponseFairing)
-        .mount("/", node_controller::routes())
-        .mount("/", pod_controller::routes())
+        .attach(common_mod::JsonResponseFairing)
+        .mount("/", controllers::node_controller::routes())
+        .mount("/", controllers::pod_controller::routes())
+        .mount("/", controllers::host_controller::routes())
         
 }

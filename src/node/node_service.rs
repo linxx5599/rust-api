@@ -5,6 +5,14 @@ use serde_json::{json, to_value, Value};
 #[path = "../client.rs"]
 mod kube_client;
 
+fn get_root_error(err: &dyn std::error::Error) -> &dyn std::error::Error {
+    let mut current_err = err;
+    while let Some(source) = current_err.source() {
+        current_err = source;
+    }
+    current_err
+}
+
 pub async fn get_node() -> Value {
     let client = kube_client::MKubeClient::new().await.unwrap();
     //查询k3s下所有的nodes
@@ -17,10 +25,9 @@ pub async fn get_node() -> Value {
             return node_value;
         }
         Err(err) => {
-            // 处理错误
-            eprintln!("错误: {:?}", err);
-            // 您可以返回一个默认值或以不同的方式处理错误
-            return json!("500: Internal Server Error");
-        }
+            let mut msg = String::from("504: Gateway Timeout");
+            msg.push_str(&get_root_error(&err).to_string());
+            json!(&msg)
+        },
     }
 }

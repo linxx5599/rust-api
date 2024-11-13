@@ -65,6 +65,26 @@ impl Fairing for JsonResponseFairing {
                                 "500: Internal Server Error",
                                 json!({ "status": Status::InternalServerError.code, "message": "Internal Server Error" }),
                             ),
+                            (
+                                "501: Not Implemented",
+                                json!({ "status": Status::NotImplemented.code, "message": body_str }),
+                            ),
+                            (
+                                "502: Bad Gateway",
+                                json!({ "status": Status::BadGateway.code, "message": body_str }),
+                            ),
+                            (
+                                "503: Service Unavailable",
+                                json!({ "status": Status::ServiceUnavailable.code, "message": body_str }),
+                            ),
+                            (
+                                "504: Gateway Timeout",
+                                json!({ "status": Status::GatewayTimeout.code, "message": body_str }),
+                            ),
+                            (
+                                "505: HTTP Version Not Supported",
+                                json!({ "status": Status::HttpVersionNotSupported.code, "message": body_str }),
+                            ),
                         ];
                         for (error, error_response) in error_responses {
                             if body_str.contains(error) {
@@ -75,18 +95,21 @@ impl Fairing for JsonResponseFairing {
                         let status_code = _response["status"].as_u64().unwrap() as u16;
                         if status_code != Status::Ok.code {
                             response.set_status(Status::from_code(status_code).unwrap());
-                        } else {
-                            let body_json: serde_json::Value =
-                                serde_json::from_str(&body_str).unwrap();
-                            //给_response添加data字段
-                            _response["data"] = body_json;
+                            let cursor = Cursor::new(_response.to_string());
+                            response.set_sized_body(cursor.get_ref().len(), cursor);
+                            return;
                         }
+                        let body_json: serde_json::Value = serde_json::from_str(&body_str).unwrap();
+                        //给_response添加data字段
+                        _response["data"] = body_json;
                         let cursor = Cursor::new(_response.to_string());
                         response.set_sized_body(cursor.get_ref().len(), cursor);
                     }
                     None => {
                         let json_body = json!({ "status": Status::InternalServerError.code, "message": "Internal Server Error" });
-                        response.set_status(Status::from_code(Status::InternalServerError.code).unwrap());
+                        response.set_status(
+                            Status::from_code(Status::InternalServerError.code).unwrap(),
+                        );
                         let cursor = Cursor::new(json_body.to_string());
                         response.set_sized_body(cursor.get_ref().len(), cursor);
                     }
